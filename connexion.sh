@@ -1,16 +1,17 @@
 #!/bin/bash
 
-GPUSER="mds"
-GPU_HOSTNAME="10.222.102.57"
-GPU_HOSTNAME_VIA_PROXY="10.3.5.7"
-GPU_PORT=3014
+# GPUSER="mds"
+# GPU_HOSTNAME="10.222.102.57"
+# GPU_HOSTNAME_VIA_PROXY="10.3.5.7"
+# GPU_PORT=3014
 
-# GPUSER=$USER
-# GPU_HOSTNAME=$HOSTNAME
-# GPU_HOSTNAME_VIA_PROXY=$HOSTNAME
-# GPU_PORT=22
+GPUSER=$USER
+GPU_HOSTNAME=$HOSTNAME
+GPU_HOSTNAME_VIA_PROXY=$HOSTNAME
+GPU_PORT=22
 
 LOGFILE=$(basename $0 | cut -d "." -f1).log
+TIMEOUT=15
 
 # Fonction pour nettoyer les ressources et terminer les processus
 cleanup() {
@@ -25,8 +26,9 @@ cleanup() {
 trap 'cleanup' SIGINT SIGTERM
 
 # Ouverture tunnel un
-ssh -p $GPU_PORT $GPUSER@$GPU_HOSTNAME_VIA_PROXY -o ConnectTimeout=5 'jupyter-notebook --no-browser 2>&1 &' > $LOGFILE 2>&1 &
-sleep 5
+remotedcommand="bash -i -c 'jupyter-notebook --no-browser 2>&1 &'"
+ssh -t -p $GPU_PORT $GPUSER@$GPU_HOSTNAME_VIA_PROXY -o ConnectTimeout=$TIMEOUT "$remotedcommand" > $LOGFILE 2>&1 &
+sleep $TIMEOUT
 
 # Recuperation de l'url depuis le fichier de log
 url=$(grep -E  "^([[:space:]]){1,}http://localhost:[0-9]{4}/*" $LOGFILE)
