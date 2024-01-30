@@ -29,7 +29,7 @@ trap 'cleanup' SIGINT SIGTERM
 remotedcommand="bash -i -c 'jupyter-notebook --no-browser 2>&1 &'"
 ssh -t -p $GPU_PORT $GPUSER@$GPU_HOSTNAME_VIA_PROXY -o ConnectTimeout=$TIMEOUT "$remotedcommand" > $LOGFILE 2>&1 &
 sleep $TIMEOUT
-
+ 
 # Recuperation de l'url depuis le fichier de log
 url=$(grep -E  "^([[:space:]]){1,}http://localhost:[0-9]{4}/*" $LOGFILE)
 port=$(echo "$url" | grep -oP 'localhost:\K[0-9]+')
